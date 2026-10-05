@@ -57,3 +57,25 @@ export function resetRows(key: string): EntryRow[] {
 export function storageKey(): string {
   return STORAGE_KEY
 }
+
+// 与业务档案分开存放的辅助 JSON（如资质风险扫描快照），共用同一个 localStorage 通道。
+export function readJson<T>(key: string): T | null {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null
+  }
+  const raw = window.localStorage.getItem(key)
+  if (!raw) {
+    return null
+  }
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    return null
+  }
+}
+
+export function writeJson<T>(key: string, value: T): void {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  }
+}
