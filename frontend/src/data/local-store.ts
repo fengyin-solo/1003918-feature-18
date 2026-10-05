@@ -2,7 +2,8 @@ import { SEED_ROWS } from './seed'
 import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
-const STORAGE_KEY = 'geohazard-monitor-prevention:entries'
+// 后缀按档案结构版本走：字段/示例语义变化时升版本，旧缓存自动回退到新种子。
+const STORAGE_KEY = 'geohazard-monitor-prevention:entries:v2'
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T

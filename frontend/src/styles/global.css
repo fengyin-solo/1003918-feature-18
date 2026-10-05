@@ -35,3 +35,25 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+
+/* 资质风险扫描面板与风险徽标 */
+.scan-panel { margin-top: 20px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.scan-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.scan-head h3 { margin: 0; font-size: 15px; }
+.scan-tip { font-size: 12px; color: var(--brand); margin: 0 0 8px; }
+.scan-empty { padding: 18px 0; }
+.scan-table { margin-top: 4px; }
+.scan-table ul { margin: 0; padding-left: 16px; }
+.suggest-list li { margin-bottom: 4px; font-size: 12px; }
+.suggest-project { color: var(--muted); }
+.suggest-reason { display: block; color: var(--muted); font-size: 12px; }
+.reason-list li { font-size: 12px; }
+.fallback-tip { color: #b54708; font-size: 12px; }
+.muted-text { color: var(--muted); font-size: 12px; }
+.stat-danger { color: #b42318; }
+.risk-badge { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: 12px; line-height: 18px; white-space: nowrap; }
+.badge-risk { background: #fee4e2; color: #b42318; }
+.badge-danger { background: #fee4e2; color: #b42318; }
+.badge-warn { background: #fef0c7; color: #b54708; }
+.badge-ok { background: #dcfae6; color: #067647; }
+.badge-muted { background: #eef2f7; color: var(--muted); }

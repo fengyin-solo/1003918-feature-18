@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>治理工程管理</h2>
-        <p class="page-desc">维护治理工程项目，围绕项目编号、隐患点编号、治理方案、承建方做登记、筛选与状态流转。</p>
+        <p class="page-desc">维护治理工程项目，围绕项目编号、隐患点编号、治理方案、承建方做登记、筛选与状态流转；承建方风险与承建单位页共用同一份单位档案。</p>
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记治理工程项目</button>
@@ -43,7 +43,16 @@
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td v-for="column in columns" :key="column">
+            <template v-if="column === '承建方风险'">
+              <span v-if="riskOf(String(row['承建方'] ?? ''))" class="risk-badge badge-risk">
+                {{ riskOf(String(row['承建方'] ?? '')) }}
+              </span>
+              <span v-else-if="eligibleOf(String(row['承建方'] ?? ''))" class="risk-badge badge-ok">可承接</span>
+              <span v-else class="risk-badge badge-muted">未建档</span>
+            </template>
+            <template v-else>{{ row[column] ?? '—' }}</template>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -79,10 +88,11 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { buildUnitProfiles, type RiskLevel } from '@/data/unit-profile'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('engineering')
-const columns = ["项目编号", "隐患点编号", "治理方案", "承建方", "合同金额", "开工日期", "计划工期", "项目状态"]
+const columns = ["项目编号", "隐患点编号", "治理方案", "承建方", "承建方风险", "合同金额", "开工日期", "计划工期", "项目状态"]
 const actions = ["启动招标", "开工确认", "申请验收"]
 const statuses = ["待立项", "招标中", "施工中", "已竣工", "待验收"]
 const stats = [{"label": "项目总数", "value": 0}, {"label": "施工中数", "value": 0}, {"label": "待验收数", "value": 0}]
@@ -91,7 +101,27 @@ const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
-const filterFields = columns.slice(0, 3)
+const filterFields = ["项目编号", "隐患点编号", "治理方案"]
+
+// 承建方风险直接读承建单位的同一份档案，不在工程侧另存状态：
+// 单位在承建单位页被暂停、拉黑或证书过期，这里立即体现。
+const profileByName = ref(new Map<string, { riskLevel: RiskLevel | null; eligible: boolean }>())
+
+function riskOf(name: string): RiskLevel | null {
+  return profileByName.value.get(name)?.riskLevel ?? null
+}
+
+function eligibleOf(name: string): boolean {
+  return profileByName.value.get(name)?.eligible ?? false
+}
+
+function refreshProfiles() {
+  const profiles = buildUnitProfiles()
+  profileByName.value = new Map(
+    profiles.map((unit) => [unit.name, { riskLevel: unit.riskLevel, eligible: unit.eligible }]),
+  )
+}
+
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -128,6 +158,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    refreshProfiles()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '治理工程列表读取失败'
   }
